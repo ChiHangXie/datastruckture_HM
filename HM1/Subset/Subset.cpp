@@ -1,3 +1,4 @@
+#include<time.h>
 #include <iostream>
 #include <string>
 
@@ -26,8 +27,16 @@ void subset(string a){
 
 int main()
 {
-    string Str;
-    cin >> Str;
+    int i=100;
+    clock_t a,b,avg_time;
+    string Str={"12345"};
+    while(--i){
     cout << "conbination: \n";
-    subseu(Str);
+    a=clock();
+    subset(Str);
+    b=clock();
+    avg_time+=b-a;
+    }
+    avg_time = avg_time/100;
+    cout << "time cause :" << avg_time/1000 << "." << avg_time%1000 << "s";
 }
