@@ -12,11 +12,11 @@ void cbn(string& a, int digit,string& current){
     
     //digit exit
     current+=a[digit];
-    cbn(a,digit+1,current);
+    cbn(a,++digit,current);
     
     //digit un-exit
     current.pop_back();
-    cbn(a,digit+1,current);
+    cbn(a,digit,current);
 }
 
 void conbination(string a){
