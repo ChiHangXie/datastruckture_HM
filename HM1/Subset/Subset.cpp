@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void cbn(string& a, int digit,string& current){
+void sus(string& a, int digit,string& current){
     
     if(digit==a.length()){
         cout << current << '\n';
@@ -12,16 +12,16 @@ void cbn(string& a, int digit,string& current){
     
     //digit exit
     current+=a[digit];
-    cbn(a,++digit,current);
+    sus(a,++digit,current);
     
     //digit un-exit
     current.pop_back();
-    cbn(a,digit,current);
+    sus(a,digit,current);
 }
 
-void conbination(string a){
+void subset(string a){
     string b;
-    cbn(a, 0, b);
+    sus(a, 0, b);
 }
 
 int main()
@@ -29,5 +29,5 @@ int main()
     string Str;
     cin >> Str;
     cout << "conbination: \n";
-    conbination(Str);
+    subseu(Str);
 }
