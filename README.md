@@ -1,2 +1,0 @@
-# datastruckture_HM
-homework
