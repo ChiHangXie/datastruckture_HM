@@ -90,16 +90,16 @@ class Polynomial {
 public:
     llist<Polynomial_seg> poly;
 
-    void insert(Polynomial_seg seg, int mode = 1);
-
-    Polynomial operator+(const Polynomial& rhs) const;
-    Polynomial operator-(const Polynomial& rhs) const;
-    Polynomial operator*(const Polynomial& rhs) const;
+    void insert(Polynomial_seg seg);
+    Polynomial Add(const Polynomial& rhs) const;
+    Polynomial Mult(const Polynomial& rhs) const;
+    //float Eval(const Polynomial& rhs) const;
+    
+    friend istream& operator>>(istream& in, Polynomial& p);
+    friend ostream& operator<<(ostream& out, const Polynomial& p);
 };
 
-void Polynomial::insert(Polynomial_seg seg, int mode) {
-    if (mode == 0) seg.coef *= -1;
-
+void Polynomial::insert(Polynomial_seg seg) {
     if (poly.start == nullptr) {
         poly.insert(seg);
         return;
@@ -116,43 +116,25 @@ void Polynomial::insert(Polynomial_seg seg, int mode) {
     poly.insert(seg);
 }
 
-Polynomial Polynomial::operator+(const Polynomial& rhs) const {
+Polynomial Polynomial::Add(const Polynomial& rhs) const { // Add
     Polynomial result;
     llist_node<Polynomial_seg>* current = poly.start;
 
     while (current != nullptr) {
-        result.insert(current->value, 1);
+        result.insert(current->value);
         current = current->next;
     }
 
     current = rhs.poly.start;
     while (current != nullptr) {
-        result.insert(current->value, 1);
+        result.insert(current->value);
         current = current->next;
     }
 
     return result;
 }
 
-Polynomial Polynomial::operator-(const Polynomial& rhs) const {
-    Polynomial result;
-    llist_node<Polynomial_seg>* current = poly.start;
-
-    while (current != nullptr) {
-        result.insert(current->value, 1);
-        current = current->next;
-    }
-
-    current = rhs.poly.start;
-    while (current != nullptr) {
-        result.insert(current->value, 0); // mode=0 means negate
-        current = current->next;
-    }
-
-    return result;
-}
-
-Polynomial Polynomial::operator*(const Polynomial& rhs) const {
+Polynomial Polynomial::Mult(const Polynomial& rhs) const {// Mult
     Polynomial result;
     llist_node<Polynomial_seg>* curR = poly.start;
 
@@ -173,7 +155,48 @@ Polynomial Polynomial::operator*(const Polynomial& rhs) const {
     return result;
 }
 
+istream& operator>>(istream& in,Polynomial& p) {
+    int segments;
+    Polynomial_seg temp;
+    cout << "請輸入欲輸入項數 : ";
+    in >> segments;
+    while(segments--){
+        cout << "請輸入係數 : ";
+        in >> temp.coef;
+        cout << "請輸入指數值 : ";
+        in >> temp._exp;
+        p.insert(temp);
+    }
+    return in;
+}
+
+ostream& operator<<(ostream& out, const Polynomial& p) {
+    llist_node<Polynomial_seg>* current = p.poly.start;
+    while(1){
+        if(current->value.coef==0){
+            current = current->next;
+            continue;
+        }
+            
+        out << current->value.coef << "x^" << current->value._exp;
+        current = current->next;
+        if(current == nullptr)
+            return out;
+        
+        if(current && current->value.coef >= 0)
+            out << "+";
+    }
+}
+
 //---------------------------------------- main
 
 int main() {
+    Polynomial a,b;
+    cout << "輸入多項式 A :\n";
+    cin >> a;
+    cout << "輸入多項式 B :\n";
+    cin >> b;
+    cout << "A(x) = " << a << "\nB(x) = " << b << '\n';
+    cout << "A+B = " << a.Add(b);
+    cout << "A*B = " << a.Mult(b);
 }
