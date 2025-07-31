@@ -1,4 +1,6 @@
 # 多項式實作
 ## 程式架構
 > linklist
->> 123
+>> linknode
+>>> next
+>>> value
