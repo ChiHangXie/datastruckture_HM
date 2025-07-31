@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 using namespace std;
 
 //---------------------------------------- Linked list
@@ -155,8 +156,14 @@ Polynomial Polynomial::Mult(const Polynomial& rhs) const {// Mult
     return result;
 }
 
-float Polynomial::Eval(int value){ // Eval
-    
+float Polynomial::Eval(int value){                  // Eval
+    llist_node<Polynomial_seg>* current=this->poly.start;
+    float val = 0;
+    while(current!=nullptr){
+        val += current->value.coef * pow(value,current->value._exp);
+        current = current->next;
+    }
+    return val;
 }
 
 istream& operator>>(istream& in,Polynomial& p) {
@@ -201,9 +208,7 @@ int main() {
     cin >> a;
     cout << "輸入多項式 B :\n";
     cin >> b;
-    cout << "A(x) = " << a << "\nB(x) = " << b << '\n';
-    cout << "A+B = " << a.Add(b);
-    cout << "A*B = " << a.Mult(b) << "\n輸入欲帶入a之值 : ";
-    cin << value;
-    cout << "A(" >> value >> ") = "a.Eval(value);
+    cout << "A(x) = " << a << "\nB(x) = " << b << "\nA+B = " << a.Add(b) << "\nA*B = " << a.Mult(b) << "\n輸入欲帶入a之值 : ";
+    cin >> value;
+    cout << "A(" << value << ") = " << a.Eval(value);
 }
