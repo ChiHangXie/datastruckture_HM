@@ -93,7 +93,7 @@ public:
     void insert(Polynomial_seg seg);
     Polynomial Add(const Polynomial& rhs) const;
     Polynomial Mult(const Polynomial& rhs) const;
-    //float Eval(const Polynomial& rhs) const;
+    float Eval(int value);
     
     friend istream& operator>>(istream& in, Polynomial& p);
     friend ostream& operator<<(ostream& out, const Polynomial& p);
@@ -155,6 +155,10 @@ Polynomial Polynomial::Mult(const Polynomial& rhs) const {// Mult
     return result;
 }
 
+float Polynomial::Eval(int value){ // Eval
+    
+}
+
 istream& operator>>(istream& in,Polynomial& p) {
     int segments;
     Polynomial_seg temp;
@@ -191,6 +195,7 @@ ostream& operator<<(ostream& out, const Polynomial& p) {
 //---------------------------------------- main
 
 int main() {
+    int value;
     Polynomial a,b;
     cout << "輸入多項式 A :\n";
     cin >> a;
@@ -198,5 +203,7 @@ int main() {
     cin >> b;
     cout << "A(x) = " << a << "\nB(x) = " << b << '\n';
     cout << "A+B = " << a.Add(b);
-    cout << "A*B = " << a.Mult(b);
+    cout << "A*B = " << a.Mult(b) << "\n輸入欲帶入a之值 : ";
+    cin << value;
+    cout << "A(" >> value >> ") = "a.Eval(value);
 }
