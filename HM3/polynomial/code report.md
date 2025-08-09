@@ -15,7 +15,7 @@ int main(){
 }
 ```
 以下為執行結果 : 
-<img>https://meee.com.tw/MSFtOnM
+![image](https://github.com/ChiHangXie/datastruckture_HM/blob/main/HM3/polynomial/%E8%9E%A2%E5%B9%95%E6%93%B7%E5%8F%96%E7%95%AB%E9%9D%A2%202025-08-10%20031421.png)
 
 ## polynomial成員函數效能分析
 1. >> 運算子 :  <br>
