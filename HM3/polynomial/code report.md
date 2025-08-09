@@ -18,7 +18,7 @@ int main(){
 ![image](https://github.com/ChiHangXie/datastruckture_HM/blob/main/HM3/polynomial/%E8%9E%A2%E5%B9%95%E6%93%B7%E5%8F%96%E7%95%AB%E9%9D%A2%202025-08-10%20031421.png)
 
 ## polynomial成員函數效能分析
-1. >> 運算子 :  <br>
+1. \>> 運算子 :  <br>
 時間複雜度 : O(n<sup>2</sup>) | n = 最終串列長度  <br>
 因要處理同指數的多項式項所以最糟糕的情況會從頭跑道尾端，所以複雜度計 O(n<sup>2</sup>)。  <br>
 空間複雜度 : O(1)
