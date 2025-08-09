@@ -1,179 +1,225 @@
 #include <iostream>
-using namespace std;
-
-//---------------------------------------- Linked list
-
-template<class T>
-class llist_node {
-public:
-    llist_node<T>* next = nullptr;
-    T value;
-};
-
-template <class T>
-class llist {
-public:
-    int element_count = 0;
-    llist_node<T>* start = nullptr;
-    llist_node<T>* end = nullptr;
-
-    void insert(const T& New_item);
-    void del(int count);
-    ~llist();
-};
-
-template <class T>
-void llist<T>::insert(const T& New_item) {
-    element_count++;
-    llist_node<T>* A = new llist_node<T>;
-    A->value = New_item;
-    A->next = nullptr;
-    if (start == nullptr) {
-        start = A;
-        end = A;
-    } else {
-        end->next = A;
-        end = A;
-    }
-}
-
-template <class T>
-void llist<T>::del(int count) {
-    if (count >= element_count || count < 0) {
-        cout << "link list removal out of range\n";
-        return;
-    }
-
-    if (count == 0) {
-        llist_node<T>* temp = start;
-        start = start->next;
-        delete temp;
-        if (start == nullptr) end = nullptr;
-        element_count--;
-        return;
-    }
-
-    llist_node<T>* current = start;
-    for (int i = 0; i < count - 1; ++i) {
-        current = current->next;
-    }
-
-    llist_node<T>* target = current->next;
-    current->next = target->next;
-    if (target == end) end = current;
-    delete target;
-    element_count--;
-}
-
-template <class T>
-llist<T>::~llist() {
-    llist_node<T>* current = start;
-    while (current != nullptr) {
-        llist_node<T>* next = current->next;
-        delete current;
-        current = next;
-    }
-    start = nullptr;
-    end = nullptr;
-}
-
-//---------------------------------------- Polynomial_seg
-
-class Polynomial_seg {
-public:
-    int _exp = 0, coef = 0;
-};
-
-//---------------------------------------- Polynomial
+#include <math.h>
 
 class Polynomial {
 public:
-    llist<Polynomial_seg> poly;
+    struct Node {
+        int coef;
+        int exp;
+        Node* link;
+        Node(int c=0, int e=0, Node* l=nullptr): coef(c), exp(e), link(l) {}
+    };
+    
+    friend void Polynomial_Init();
 
-    void insert(Polynomial_seg seg, int mode = 1);
+    Polynomial();
+    Polynomial(const Polynomial& a);
+    const Polynomial& operator=(const Polynomial& a);
+    ~Polynomial();
 
-    Polynomial operator+(const Polynomial& rhs) const;
-    Polynomial operator-(const Polynomial& rhs) const;
-    Polynomial operator*(const Polynomial& rhs) const;
+    friend std::istream& operator>>(std::istream& in, Polynomial& p);
+    friend std::ostream& operator<<(std::ostream& out, const Polynomial& p);
+
+    Polynomial operator+(const Polynomial& p) const;
+    Polynomial operator-(const Polynomial& p) const;
+    Polynomial operator*(const Polynomial& p) const;
+
+    float Evaluate(float x) const;
+
+private:
+    Node* header;
+    Node* end;
+
+    static Node* available;
+
+    static Node* getNode(int coef, int exp);
+    static void freeNode(Node* p);
+
+    void insertOrCombine(int coef, int exp);
+
+    void releaseAll();
 };
 
-void Polynomial::insert(Polynomial_seg seg, int mode) {
-    if (mode == 0) seg.coef *= -1;
+Polynomial::Node* Polynomial::available = nullptr;
 
-    if (poly.start == nullptr) {
-        poly.insert(seg);
-        return;
+Polynomial::Polynomial(){
+    header = new Node;
+    header->link = header;
+    end = header;
+}
+
+Polynomial::Polynomial(const Polynomial& a){
+    header = new Node;
+    header->link = header;
+    end = header;                   // copy 之前完成construct
+    
+    Node* current = a.header->link;
+    while(current!= a.header){
+        Node* new_node = getNode(current->coef, current->exp);
+        new_node->link = header;    // 加入 llist
+        end->link = new_node;       // 完善循環
+        end = end->link;            // end 跟隨
+        current = current->link;
     }
+}
 
-    llist_node<Polynomial_seg>* current = poly.start;
-    while (current != nullptr) {
-        if (current->value._exp == seg._exp) {
-            current->value.coef += seg.coef;
+const Polynomial& Polynomial::operator=(const Polynomial& a){
+    if (this == &a) return *this;
+
+    releaseAll();
+    
+    Node* current = a.header->link; // 邏輯同copy
+    while (current != a.header) {
+        Node* new_node = getNode(current->coef, current->exp);
+        new_node->link = header;   
+        end->link = new_node;      
+        end = new_node;            
+        current = current->link;
+    }
+    
+    return *this;
+}
+
+
+Polynomial::~Polynomial(){
+    releaseAll();
+    delete header;
+    header = nullptr;
+    end = nullptr;
+}
+
+std::istream& operator>>(std::istream& in, Polynomial& p){
+    int coef, exp, segments;
+    std::cout << "請輸入欲輸入項數 : ";
+    in >> segments;
+    while(segments--){
+        std::cout << "請輸入係數 : ";
+        in >> coef;
+        std::cout << "請輸入指數值 : ";
+        in >> exp;
+        p.insertOrCombine(coef, exp);
+    }
+    return in;
+}
+
+std::ostream& operator<<(std::ostream& out, const Polynomial& p) {
+    Polynomial::Node* current = p.header->link;
+    bool first = true;
+    while (current != p.header) {
+        if (current->coef != 0) {
+            if (!first && current->coef > 0) {
+                out << "+";
+            }
+            out << current->coef << "x^" << current->exp;
+            first = false;
+        }
+        current = current->link;
+    }
+    return out;
+}
+
+Polynomial Polynomial::operator+(const Polynomial& p) const {
+    Polynomial result = Polynomial(*this);
+    Node* current = p.header->link;
+
+    while (current != p.header) {
+        result.insertOrCombine(current->coef, current->exp);
+        current = current->link;
+    }
+    
+    return result;
+}
+
+Polynomial Polynomial::operator-(const Polynomial& p) const {
+    Polynomial result = Polynomial(*this);
+    Node* current = p.header->link;
+
+    while (current != p.header) {
+        result.insertOrCombine(current->coef*-1, current->exp);
+        current = current->link;
+    }
+    
+    return result;
+}
+
+Polynomial Polynomial::operator*(const Polynomial& p) const {
+    Polynomial result;
+    Node* here = header->link;
+    Node* there = p.header->link;
+    
+    while(here!=header){
+        while(there!=p.header){
+            result.insertOrCombine(here->coef*there->coef,here->exp+there->exp);
+            there = there->link;
+        }
+        there = p.header->link;
+        here = here->link;
+    }
+    return result;
+}
+
+float Polynomial::Evaluate(float x) const {
+    float total=0;
+    Node* current = header->link;
+    while(current!=header){
+        total+=current->coef*pow(x, current->exp);
+        current = current->link;
+    }
+    return total;
+}
+
+Polynomial::Node* Polynomial::getNode(int coef, int exp){
+    Polynomial::Node* Node_for_use;
+    if(available!=nullptr){
+        Node_for_use = available;
+        available = available->link;
+    }else{
+        Node_for_use = new Node;
+    }
+    Node_for_use->coef = coef;
+    Node_for_use->exp = exp;
+    Node_for_use->link = nullptr;
+    return Node_for_use;
+}
+
+void Polynomial::freeNode(Node* p){
+    p->link = available;
+    available = p;
+}
+
+void Polynomial::insertOrCombine(int coef, int exp){
+    if(coef == 0)
+        return;
+    Node* current=header->link;
+    while(current!=header){
+        if(exp == current->exp){
+            current->coef+=coef;
             return;
         }
-        current = current->next;
+        current = current->link;
     }
-    poly.insert(seg);
+    current = getNode(coef,exp);
+    end->link=current; 
+    current->link = header;
+    end = current;
+    return;
 }
 
-Polynomial Polynomial::operator+(const Polynomial& rhs) const {
-    Polynomial result;
-    llist_node<Polynomial_seg>* current = poly.start;
-
-    while (current != nullptr) {
-        result.insert(current->value, 1);
-        current = current->next;
-    }
-
-    current = rhs.poly.start;
-    while (current != nullptr) {
-        result.insert(current->value, 1);
-        current = current->next;
-    }
-
-    return result;
+void Polynomial::releaseAll(){
+    end->link = Polynomial::available;  // 把整個串列移置 available
+    available = header->link;
+    header->link = header;  // 重制環狀串列
+    end = header;
 }
 
-Polynomial Polynomial::operator-(const Polynomial& rhs) const {
-    Polynomial result;
-    llist_node<Polynomial_seg>* current = poly.start;
-
-    while (current != nullptr) {
-        result.insert(current->value, 1);
-        current = current->next;
-    }
-
-    current = rhs.poly.start;
-    while (current != nullptr) {
-        result.insert(current->value, 0); // mode=0 means negate
-        current = current->next;
-    }
-
-    return result;
-}
-
-Polynomial Polynomial::operator*(const Polynomial& rhs) const {
-    Polynomial result;
-    llist_node<Polynomial_seg>* curR = poly.start;
-
-    while (curR != nullptr) {
-        llist_node<Polynomial_seg>* curL = rhs.poly.start;
-
-        while (curL != nullptr) {
-            Polynomial_seg temp;
-            temp.coef = curR->value.coef * curL->value.coef;
-            temp._exp = curR->value._exp + curL->value._exp;
-            result.insert(temp);
-            curL = curL->next;
-        }
-
-        curR = curR->next;
-    }
-
-    return result;
-}
-
-//---------------------------------------- main
-
-int main() {
+int main(){
+    int x;
+    Polynomial a,b;
+    std::cout << "輸入 A :\n";
+    std::cin >> a;
+    std::cout << "輸入 B :\n";
+    std::cin >> b;
+    std::cout << "\nA + B = " << a+b << "\nA - B = " << a-b << "\nA * B = " << a*b << "\n請輸入x";
+    std::cin >> x;
+    std::cout << "A(x) = " << a.Evaluate(x);
 }
