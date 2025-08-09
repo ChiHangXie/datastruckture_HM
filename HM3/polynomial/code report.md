@@ -55,7 +55,7 @@ int main(){
 沒有額外要求空間。 <br> <br>
 8. 包含 freeNode、 getNode、 releaseAll 的 available link list 管理函式 :  <br>
 時間複雜度 : O(1)  <br>
-這一些管理函示都只有固定步驟所以複雜度是 O(1)。
+這一些管理函示都只有固定步驟所以複雜度是 O(1)。  <br>
 空間複雜度 : O(1)  <br>
 這一些函式沒有會成長的空間需求。  <br>  <br>
 9. insertOrCombine 方法 : <br>
